@@ -1,6 +1,6 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" class="h-full">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Study Buddy Task Manager</title>
@@ -8,7 +8,7 @@
   <script src="/_sdk/element_sdk.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       box-sizing: border-box;
@@ -45,78 +45,270 @@
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="h-full">
+</head>
+<body class="h-full">
   <div id="app-wrapper" class="h-full w-full overflow-auto" style="background: #fef7ed;">
-   <div class="max-w-2xl mx-auto p-6"><!-- Header -->
-    <header class="text-center mb-8">
-     <h1 id="app-title" class="text-3xl font-bold mb-2" style="color: #1e293b;">📚 Study Buddy</h1>
-     <p class="text-sm" style="color: #64748b;">Smart task prioritization for busy students</p>
-    </header><!-- Add Task Form -->
-    <div class="rounded-2xl p-6 mb-6 shadow-sm" style="background: #ffffff;">
-     <h2 class="font-semibold mb-4 flex items-center gap-2" style="color: #1e293b;"><span>✨</span> Add New Task</h2>
-     <form id="task-form" class="space-y-4">
-      <div><label for="task-title" class="block text-sm font-medium mb-1" style="color: #1e293b;">What do you need to do?</label> <input type="text" id="task-title" placeholder="e.g., Finish math homework" required class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition" style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+    <div class="max-w-2xl mx-auto p-6">
+      <!-- Header -->
+      <header class="text-center mb-8">
+        <h1 id="app-title" class="text-3xl font-bold mb-2" style="color: #1e293b;">📚 Study Buddy</h1>
+        <p class="text-sm" style="color: #64748b;">Smart task prioritization for busy students</p>
+      </header>
+
+      <!-- Add Task Form -->
+      <div class="rounded-2xl p-6 mb-6 shadow-sm" style="background: #ffffff;">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-semibold flex items-center gap-2" style="color: #1e293b;">
+            <span>✨</span> Add New Task
+          </h2>
+          <button type="button" id="toggle-quick-add" class="text-xs px-3 py-1 rounded-lg transition" style="background: #f0f9ff; color: #0369a1;">
+            Quick Add →
+          </button>
+        </div>
+        
+        <!-- Quick Add Form (hidden by default) -->
+        <form id="quick-add-form" class="space-y-3 hidden mb-4 pb-4 border-b" style="border-color: #e2e8f0;">
+          <div>
+            <label for="quick-title" class="block text-sm font-medium mb-1" style="color: #1e293b;">What do you need to do?</label>
+            <input type="text" id="quick-title" placeholder="e.g., Finish math homework" required
+              class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition"
+              style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+          </div>
+          <div>
+            <label for="quick-deadline" class="block text-sm font-medium mb-1" style="color: #1e293b;">📅 Deadline</label>
+            <input type="datetime-local" id="quick-deadline" required
+              class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition"
+              style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+          </div>
+          <button type="submit" class="w-full py-2 px-4 rounded-xl font-semibold text-white transition hover:opacity-90"
+            style="background: #f97316;">
+            Quick Add (30 mins, Medium)
+          </button>
+        </form>
+
+        <form id="task-form" class="space-y-4">
+          <div>
+            <label for="task-title" class="block text-sm font-medium mb-1" style="color: #1e293b;">What do you need to do?</label>
+            <input type="text" id="task-title" placeholder="e.g., Finish math homework" required
+              class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition"
+              style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="task-deadline" class="block text-sm font-medium mb-1" style="color: #1e293b;">📅 Deadline</label>
+              <input type="datetime-local" id="task-deadline" required
+                class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition"
+                style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+            </div>
+            <div>
+              <label for="task-duration" class="block text-sm font-medium mb-1" style="color: #1e293b;">⏱️ Duration (mins)</label>
+              <input type="number" id="task-duration" min="5" max="480" placeholder="30" required
+                class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition"
+                style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: #1e293b;">🎯 How important is this?</label>
+            <div class="flex gap-3">
+              <label class="flex-1 cursor-pointer">
+                <input type="radio" name="importance" value="low" class="sr-only peer">
+                <div class="text-center py-3 px-4 rounded-xl border-2 peer-checked:border-green-500 peer-checked:bg-green-50 transition" style="border-color: #e2e8f0;">
+                  <span class="text-lg">😌</span>
+                  <p class="text-xs mt-1 font-medium">Low</p>
+                </div>
+              </label>
+              <label class="flex-1 cursor-pointer">
+                <input type="radio" name="importance" value="medium" class="sr-only peer" checked>
+                <div class="text-center py-3 px-4 rounded-xl border-2 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition" style="border-color: #e2e8f0;">
+                  <span class="text-lg">🤔</span>
+                  <p class="text-xs mt-1 font-medium">Medium</p>
+                </div>
+              </label>
+              <label class="flex-1 cursor-pointer">
+                <input type="radio" name="importance" value="high" class="sr-only peer">
+                <div class="text-center py-3 px-4 rounded-xl border-2 peer-checked:border-red-500 peer-checked:bg-red-50 transition" style="border-color: #e2e8f0;">
+                  <span class="text-lg">🔥</span>
+                  <p class="text-xs mt-1 font-medium">High</p>
+                </div>
+              </label>
+            </div>
+          </div>
+          
+          <button type="submit" id="submit-btn"
+            class="w-full py-3 px-6 rounded-xl font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+            style="background: #f97316;">
+            Add Task
+          </button>
+        </form>
       </div>
-      <div class="grid grid-cols-2 gap-4">
-       <div><label for="task-deadline" class="block text-sm font-medium mb-1" style="color: #1e293b;">📅 Deadline</label> <input type="datetime-local" id="task-deadline" required class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition" style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
-       </div>
-       <div><label for="task-duration" class="block text-sm font-medium mb-1" style="color: #1e293b;">⏱️ Duration (mins)</label> <input type="number" id="task-duration" min="5" max="480" placeholder="30" required class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition" style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
-       </div>
+
+      <!-- Warnings and Suggestions -->
+      <div id="alerts-container" class="space-y-4 mb-6"></div>
+
+      <!-- Suggested Task -->
+      <div id="suggestion-card" class="hidden rounded-2xl p-5 mb-6 border-2 border-dashed fade-in" style="border-color: #f97316; background: #fff7ed;">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">🎯</span>
+          <div class="flex-1">
+            <p class="text-xs font-medium uppercase tracking-wide" style="color: #f97316;">Start with this one!</p>
+            <p id="suggestion-title" class="font-semibold" style="color: #1e293b;"></p>
+            <p id="suggestion-time" class="text-xs mt-1" style="color: #92400e;"></p>
+            <p id="suggestion-timing" class="text-xs mt-2 px-3 py-1 rounded-lg inline-block" style="background: #fef3c7; color: #92400e;"></p>
+            <div class="flex gap-2 mt-3">
+              <button id="start-focus-btn" class="text-xs px-3 py-2 rounded-lg font-medium transition" style="background: #f97316; color: #ffffff;">
+                🎯 Start Focus Session
+              </button>
+              <button id="edit-suggestion-btn" class="text-xs px-3 py-2 rounded-lg font-medium transition" style="background: #e2e8f0; color: #1e293b;">
+                ✏️ Edit
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Focus Mode UI (hidden by default) -->
+        <div id="focus-mode" class="hidden mt-4 pt-4 border-t" style="border-color: #fed7aa;">
+          <div class="text-center mb-4">
+            <p class="text-sm" style="color: #92400e;">Focus Session Active</p>
+            <div id="focus-timer" class="text-4xl font-bold mt-2" style="color: #f97316; font-family: 'Space Grotesk', monospace;">00:00</div>
+          </div>
+          <div class="space-y-2">
+            <button id="pause-focus-btn" class="w-full py-2 px-3 rounded-lg text-sm font-medium transition" style="background: #fef3c7; color: #92400e;">
+              ⏸️ Pause Session
+            </button>
+            <button id="complete-focus-btn" class="w-full py-2 px-3 rounded-lg text-sm font-medium text-white transition" style="background: #22c55e;">
+              ✅ Finish & Mark Complete
+            </button>
+            <button id="cancel-focus-btn" class="w-full py-2 px-3 rounded-lg text-sm font-medium transition" style="background: #fee2e2; color: #dc2626;">
+              ❌ Cancel Session
+            </button>
+          </div>
+        </div>
       </div>
-      <div><label class="block text-sm font-medium mb-2" style="color: #1e293b;">🎯 How important is this?</label>
-       <div class="flex gap-3"><label class="flex-1 cursor-pointer"> <input type="radio" name="importance" value="low" class="sr-only peer">
-         <div class="text-center py-3 px-4 rounded-xl border-2 peer-checked:border-green-500 peer-checked:bg-green-50 transition" style="border-color: #e2e8f0;"><span class="text-lg">😌</span>
-          <p class="text-xs mt-1 font-medium">Low</p>
-         </div></label> <label class="flex-1 cursor-pointer"> <input type="radio" name="importance" value="medium" class="sr-only peer" checked>
-         <div class="text-center py-3 px-4 rounded-xl border-2 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition" style="border-color: #e2e8f0;"><span class="text-lg">🤔</span>
-          <p class="text-xs mt-1 font-medium">Medium</p>
-         </div></label> <label class="flex-1 cursor-pointer"> <input type="radio" name="importance" value="high" class="sr-only peer">
-         <div class="text-center py-3 px-4 rounded-xl border-2 peer-checked:border-red-500 peer-checked:bg-red-50 transition" style="border-color: #e2e8f0;"><span class="text-lg">🔥</span>
-          <p class="text-xs mt-1 font-medium">High</p>
-         </div></label>
-       </div>
-      </div><button type="submit" id="submit-btn" class="w-full py-3 px-6 rounded-xl font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style="background: #f97316;"> Add Task </button>
-     </form>
-    </div><!-- Warnings and Suggestions -->
-    <div id="alerts-container" class="space-y-4 mb-6"></div><!-- Suggested Task -->
-    <div id="suggestion-card" class="hidden rounded-2xl p-5 mb-6 border-2 border-dashed fade-in" style="border-color: #f97316; background: #fff7ed;">
-     <div class="flex items-start gap-3"><span class="text-2xl">🎯</span>
-      <div class="flex-1">
-       <p class="text-xs font-medium uppercase tracking-wide" style="color: #f97316;">Start with this one!</p>
-       <p id="suggestion-title" class="font-semibold" style="color: #1e293b;"></p>
-       <p id="suggestion-time" class="text-xs mt-1" style="color: #92400e;"></p>
+
+      <!-- Daily Progress Summary -->
+      <div id="progress-summary" class="hidden rounded-2xl p-4 mb-6 shadow-sm" style="background: #f0fdf4; border: 1px solid #86efac;">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium uppercase" style="color: #16a34a;">Today's Progress</p>
+            <p id="progress-text" class="text-sm font-semibold mt-1" style="color: #1e293b;"></p>
+          </div>
+          <div class="text-2xl" id="progress-emoji">📊</div>
+        </div>
       </div>
-     </div>
-    </div><!-- Task Lists -->
-    <div id="tasks-container" class="space-y-6"><!-- Do Now Section -->
-     <section id="do-now-section" class="hidden">
-      <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: #dc2626;"><span class="w-3 h-3 rounded-full bg-red-500 priority-badge"></span> Do Now 🚨</h3>
-      <div id="do-now-tasks" class="space-y-3"></div>
-     </section><!-- Do Next Section -->
-     <section id="do-next-section" class="hidden">
-      <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: #f59e0b;"><span class="w-3 h-3 rounded-full bg-yellow-500"></span> Do Next 📋</h3>
-      <div id="do-next-tasks" class="space-y-3"></div>
-     </section><!-- Can Wait Section -->
-     <section id="can-wait-section" class="hidden">
-      <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: #22c55e;"><span class="w-3 h-3 rounded-full bg-green-500"></span> Can Wait 🌿</h3>
-      <div id="can-wait-tasks" class="space-y-3"></div>
-     </section>
-    </div><!-- Empty State -->
-    <div id="empty-state" class="text-center py-12">
-     <div class="text-6xl mb-4">
-      📝
-     </div>
-     <h3 id="empty-title" class="font-semibold text-lg mb-2" style="color: #1e293b;">No tasks yet!</h3>
-     <p class="text-sm" style="color: #64748b;">Add your first task above to get started</p>
-    </div><!-- Completed Section -->
-    <section id="completed-section" class="hidden mt-6"><button id="toggle-completed" class="w-full text-left font-medium py-2 flex items-center gap-2" style="color: #64748b;"> <span id="completed-arrow">▶</span> <span>Completed Tasks</span> <span id="completed-count" class="text-xs px-2 py-1 rounded-full" style="background: #e2e8f0;"></span> </button>
-     <div id="completed-tasks" class="space-y-3 mt-3 hidden"></div>
-    </section>
-   </div>
+
+      <!-- Task Lists -->
+      <div id="tasks-container" class="space-y-6">
+        <!-- Do Now Section -->
+        <section id="do-now-section" class="hidden">
+          <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: #dc2626;">
+            <span class="w-3 h-3 rounded-full bg-red-500 priority-badge"></span>
+            Do Now 🚨
+          </h3>
+          <div id="do-now-tasks" class="space-y-3"></div>
+        </section>
+
+        <!-- Do Next Section -->
+        <section id="do-next-section" class="hidden">
+          <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: #f59e0b;">
+            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+            Do Next 📋
+          </h3>
+          <div id="do-next-tasks" class="space-y-3"></div>
+        </section>
+
+        <!-- Can Wait Section -->
+        <section id="can-wait-section" class="hidden">
+          <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: #22c55e;">
+            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+            Can Wait 🌿
+          </h3>
+          <div id="can-wait-tasks" class="space-y-3"></div>
+        </section>
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="text-center py-12">
+        <div class="text-6xl mb-4">📝</div>
+        <h3 id="empty-title" class="font-semibold text-lg mb-2" style="color: #1e293b;">No tasks yet!</h3>
+        <p class="text-sm" style="color: #64748b;">Add your first task above to get started</p>
+      </div>
+
+      <!-- Completed Section -->
+      <section id="completed-section" class="hidden mt-6">
+        <button id="toggle-completed" class="w-full text-left font-medium py-2 flex items-center gap-2" style="color: #64748b;">
+          <span id="completed-arrow">▶</span>
+          <span>Completed Tasks</span>
+          <span id="completed-count" class="text-xs px-2 py-1 rounded-full" style="background: #e2e8f0;"></span>
+        </button>
+        <div id="completed-tasks" class="space-y-3 mt-3 hidden"></div>
+      </section>
+    </div>
   </div>
+
+  <!-- Edit Task Modal -->
+  <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4" style="backdrop-filter: blur(2px);">
+    <div class="rounded-2xl p-6 shadow-lg max-w-md w-full fade-in" style="background: #ffffff;">
+      <h3 class="text-lg font-semibold mb-4" style="color: #1e293b;">Edit Task</h3>
+      <form id="edit-form" class="space-y-4">
+        <div>
+          <label for="edit-title" class="block text-sm font-medium mb-1" style="color: #1e293b;">Title</label>
+          <input type="text" id="edit-title" required
+            class="w-full px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 transition"
+            style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+        </div>
+        
+        <div>
+          <label for="edit-deadline" class="block text-sm font-medium mb-1" style="color: #1e293b;">📅 Deadline</label>
+          <input type="datetime-local" id="edit-deadline" required
+            class="w-full px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 transition"
+            style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+        </div>
+        
+        <div>
+          <label for="edit-duration" class="block text-sm font-medium mb-1" style="color: #1e293b;">⏱️ Duration (mins)</label>
+          <input type="number" id="edit-duration" min="5" max="480" required
+            class="w-full px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 transition"
+            style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color: #1e293b;">🎯 Importance</label>
+          <div class="flex gap-2">
+            <label class="flex-1 cursor-pointer">
+              <input type="radio" name="edit-importance" value="low" class="sr-only peer">
+              <div class="text-center py-2 px-3 rounded-lg border-2 peer-checked:border-green-500 peer-checked:bg-green-50 transition" style="border-color: #e2e8f0;">
+                <span class="text-sm">😌</span>
+              </div>
+            </label>
+            <label class="flex-1 cursor-pointer">
+              <input type="radio" name="edit-importance" value="medium" class="sr-only peer">
+              <div class="text-center py-2 px-3 rounded-lg border-2 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition" style="border-color: #e2e8f0;">
+                <span class="text-sm">🤔</span>
+              </div>
+            </label>
+            <label class="flex-1 cursor-pointer">
+              <input type="radio" name="edit-importance" value="high" class="sr-only peer">
+              <div class="text-center py-2 px-3 rounded-lg border-2 peer-checked:border-red-500 peer-checked:bg-red-50 transition" style="border-color: #e2e8f0;">
+                <span class="text-sm">🔥</span>
+              </div>
+            </label>
+          </div>
+        </div>
+        
+        <div class="flex gap-3 pt-4">
+          <button type="submit" class="flex-1 py-2 px-4 rounded-lg font-semibold text-white transition" style="background: #f97316;">
+            Save Changes
+          </button>
+          <button type="button" id="cancel-edit-btn" class="flex-1 py-2 px-4 rounded-lg font-semibold transition" style="background: #e2e8f0; color: #1e293b;">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     // Default configuration
     const defaultConfig = {
@@ -132,6 +324,11 @@
     let config = { ...defaultConfig };
     let tasks = [];
     let showCompleted = false;
+    let focusSessionActive = false;
+    let focusTaskId = null;
+    let focusTimeRemaining = 0;
+    let focusIntervalId = null;
+    let editingTaskId = null;
 
     // LocalStorage helper functions with fail-safe persistence
     const STORAGE_KEY = 'studybuddy_tasks';
@@ -212,7 +409,8 @@
       const hoursUntilDue = msUntilDue / (1000 * 60 * 60);
       const durationHours = task.duration / 60;
       
-      const importanceScore = { high: 3, medium: 2, low: 1 }[task.importance];
+      // Tuned importance scoring (slightly increased weighting)
+      const importanceScore = { high: 5, medium: 3, low: 1 }[task.importance];
       
       // Urgency scoring
       let urgencyScore = 0;
@@ -232,8 +430,8 @@
         urgencyScore = 1; // More than 3 days away
       }
       
-      // Combined score: urgency weighted heavily (2x) + importance
-      const totalScore = (urgencyScore * 2) + importanceScore;
+      // Combined score: urgency weighted heavily (2.5x) + importance
+      const totalScore = (urgencyScore * 2.5) + importanceScore;
       
       return {
         totalScore,
@@ -301,6 +499,16 @@
       if (doNowTasks.length > 0) {
         const totalMinutesNeeded = doNowTasks.reduce((sum, t) => sum + t.duration, 0);
         
+        // Burnout warning - 180 min (3 hours) threshold
+        if (totalMinutesNeeded > 180) {
+          warnings.push({
+            type: 'burnout',
+            severity: 'high',
+            message: `💪 <strong>Burnout Alert!</strong> You have ${totalMinutesNeeded} minutes of urgent work (${Math.round(totalMinutesNeeded / 60)} hours). That's a lot for today! Break it into chunks and take breaks every 45 mins.`,
+            totalMinutes: totalMinutesNeeded
+          });
+        }
+        
         // Find earliest deadline
         const earliestDeadline = Math.min(
           ...doNowTasks.map(t => {
@@ -311,7 +519,7 @@
         
         const minutesAvailable = Math.round(earliestDeadline * 60);
 
-        if (totalMinutesNeeded > minutesAvailable) {
+        if (totalMinutesNeeded > minutesAvailable && totalMinutesNeeded <= 180) {
           const deficit = totalMinutesNeeded - minutesAvailable;
           warnings.push({
             type: 'unrealistic',
@@ -319,7 +527,7 @@
             message: `😰 <strong>Unrealistic Workload!</strong> You need ${totalMinutesNeeded} mins but only have ~${minutesAvailable} mins available. You're short by ${deficit} mins. Focus on highest-priority tasks first.`,
             deficit
           });
-        } else if (totalMinutesNeeded > minutesAvailable * 0.7) {
+        } else if (totalMinutesNeeded > minutesAvailable * 0.7 && totalMinutesNeeded <= 180) {
           warnings.push({
             type: 'tight',
             severity: 'medium',
@@ -467,6 +675,7 @@
       const completedSection = document.getElementById('completed-section');
       const emptyState = document.getElementById('empty-state');
       const suggestionCard = document.getElementById('suggestion-card');
+      const progressSummary = document.getElementById('progress-summary');
       
       // Render do now
       const doNowContainer = document.getElementById('do-now-tasks');
@@ -496,7 +705,31 @@
       // Show/hide empty state
       emptyState.classList.toggle('hidden', activeTasks.length > 0);
       
-      // Show top suggestion
+      // Daily progress summary
+      const totalTodayTasks = tasks.filter(t => {
+        const deadline = new Date(t.deadline);
+        const today = new Date();
+        return deadline.toDateString() === today.toDateString();
+      }).length;
+      
+      if (totalTodayTasks > 0) {
+        const completedTodayTasks = tasks.filter(t => {
+          const deadline = new Date(t.deadline);
+          const today = new Date();
+          return t.completed && deadline.toDateString() === today.toDateString();
+        }).length;
+        
+        const percentage = Math.round((completedTodayTasks / totalTodayTasks) * 100);
+        const progressEmoji = percentage === 100 ? '🎉' : percentage >= 75 ? '🔥' : percentage >= 50 ? '💪' : '📊';
+        
+        document.getElementById('progress-text').textContent = `${completedTodayTasks} of ${totalTodayTasks} tasks completed (${percentage}%)`;
+        document.getElementById('progress-emoji').textContent = progressEmoji;
+        progressSummary.classList.remove('hidden');
+      } else {
+        progressSummary.classList.add('hidden');
+      }
+      
+      // Show top suggestion with time blocking
       if (categorized.length > 0) {
         suggestionCard.classList.remove('hidden');
         const topTask = categorized[0];
@@ -514,11 +747,26 @@
         
         const urgentFlag = score.isImpossible ? '🔴 ' : (score.isOverdue ? '⚠️ ' : '');
         document.getElementById('suggestion-time').textContent = `${urgentFlag}⏰ ${timeText} left • ${topTask.task.duration} mins needed`;
+        
+        // Time blocking suggestion
+        const now = new Date();
+        const buffer = 5; // 5 min buffer
+        const startTime = new Date(now.getTime() + buffer * 60000);
+        const endTime = new Date(startTime.getTime() + topTask.task.duration * 60000);
+        
+        const startStr = startTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const endStr = endTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        
+        document.getElementById('suggestion-timing').textContent = `📅 ${startStr} → ${endStr}`;
+        
+        // Focus button handler
+        document.getElementById('start-focus-btn').onclick = () => startFocusSession(topTask.task.id);
+        document.getElementById('edit-suggestion-btn').onclick = () => openEditModal(topTask.task.id);
       } else {
         suggestionCard.classList.add('hidden');
       }
       
-      // Attach event listeners
+      // Attach event listeners for all tasks
       document.querySelectorAll('.complete-btn').forEach(btn => {
         btn.addEventListener('click', () => toggleComplete(btn.dataset.id));
       });
@@ -526,6 +774,30 @@
       document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', () => deleteTask(btn.dataset.id));
       });
+      
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+      });
+      
+      // Pause button handler
+      document.getElementById('pause-focus-btn').onclick = pauseFocusSession;
+      
+      // Complete focus button handler
+      document.getElementById('complete-focus-btn').onclick = () => {
+        if (focusTaskId) {
+          const task = tasks.find(t => t.id === focusTaskId);
+          if (task) task.completed = true;
+        }
+        endFocusSession();
+        saveTasks(tasks);
+        renderTasks();
+      };
+      
+      // Cancel focus button handler
+      document.getElementById('cancel-focus-btn').onclick = () => {
+        endFocusSession();
+        renderTasks();
+      };
       
       // Verify data persistence after rendering
       const saveResult = saveTasks(tasks);
@@ -562,6 +834,154 @@
         }, 3000);
       }
     }
+
+    // Toggle quick add form
+    document.getElementById('toggle-quick-add').addEventListener('click', () => {
+      const form = document.getElementById('quick-add-form');
+      form.classList.toggle('hidden');
+    });
+
+    // Quick add form submission
+    document.getElementById('quick-add-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const title = document.getElementById('quick-title').value.trim();
+      const deadline = document.getElementById('quick-deadline').value;
+      
+      const newTask = {
+        id: Date.now().toString(),
+        title,
+        deadline,
+        duration: 30, // Quick add default
+        importance: 'medium', // Quick add default
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+      
+      tasks.push(newTask);
+      saveTasks(tasks);
+      
+      e.target.reset();
+      document.getElementById('quick-add-form').classList.add('hidden');
+      renderTasks();
+    });
+
+    // Start focus session
+    function startFocusSession(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+      
+      focusSessionActive = true;
+      focusTaskId = taskId;
+      focusTimeRemaining = task.duration * 60; // Convert to seconds
+      
+      document.getElementById('focus-mode').classList.remove('hidden');
+      document.getElementById('start-focus-btn').style.display = 'none';
+      document.getElementById('edit-suggestion-btn').style.display = 'none';
+      
+      // Start timer
+      updateFocusTimer();
+      focusIntervalId = setInterval(updateFocusTimer, 1000);
+    }
+
+    function updateFocusTimer() {
+      const minutes = Math.floor(focusTimeRemaining / 60);
+      const seconds = focusTimeRemaining % 60;
+      const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      
+      document.getElementById('focus-timer').textContent = display;
+      
+      if (focusTimeRemaining <= 0) {
+        clearInterval(focusIntervalId);
+        autoCompleteFocusSession();
+      }
+      
+      focusTimeRemaining--;
+    }
+
+    function autoCompleteFocusSession() {
+      const task = tasks.find(t => t.id === focusTaskId);
+      if (task) {
+        task.completed = true;
+        saveTasks(tasks);
+      }
+      
+      endFocusSession();
+      renderTasks();
+      
+      // Show celebration
+      const timer = document.getElementById('focus-timer');
+      timer.textContent = '🎉';
+      timer.style.fontSize = '2em';
+      
+      setTimeout(() => {
+        timer.style.fontSize = '2.25em';
+        timer.textContent = '00:00';
+      }, 1500);
+    }
+
+    function pauseFocusSession() {
+      clearInterval(focusIntervalId);
+      document.getElementById('pause-focus-btn').textContent = '▶️ Resume Session';
+      document.getElementById('pause-focus-btn').onclick = resumeFocusSession;
+    }
+
+    function resumeFocusSession() {
+      focusIntervalId = setInterval(updateFocusTimer, 1000);
+      document.getElementById('pause-focus-btn').textContent = '⏸️ Pause Session';
+      document.getElementById('pause-focus-btn').onclick = null;
+    }
+
+    function endFocusSession() {
+      focusSessionActive = false;
+      focusTaskId = null;
+      focusTimeRemaining = 0;
+      clearInterval(focusIntervalId);
+      
+      document.getElementById('focus-mode').classList.add('hidden');
+      document.getElementById('start-focus-btn').style.display = 'inline-block';
+      document.getElementById('edit-suggestion-btn').style.display = 'inline-block';
+      document.getElementById('pause-focus-btn').textContent = '⏸️ Pause Session';
+      document.getElementById('pause-focus-btn').onclick = null;
+    }
+
+    // Edit task modal handlers
+    function openEditModal(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+      
+      editingTaskId = taskId;
+      document.getElementById('edit-title').value = task.title;
+      document.getElementById('edit-deadline').value = task.deadline;
+      document.getElementById('edit-duration').value = task.duration;
+      document.querySelector(`input[name="edit-importance"][value="${task.importance}"]`).checked = true;
+      
+      document.getElementById('edit-modal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      editingTaskId = null;
+      document.getElementById('edit-modal').classList.add('hidden');
+    }
+
+    // Edit form submission
+    document.getElementById('edit-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const task = tasks.find(t => t.id === editingTaskId);
+      if (!task) return;
+      
+      task.title = document.getElementById('edit-title').value.trim();
+      task.deadline = document.getElementById('edit-deadline').value;
+      task.duration = parseInt(document.getElementById('edit-duration').value);
+      task.importance = document.querySelector('input[name="edit-importance"]:checked').value;
+      
+      saveTasks(tasks);
+      closeEditModal();
+      renderTasks();
+    });
+
+    document.getElementById('cancel-edit-btn').addEventListener('click', closeEditModal);
 
     // Form submission
     document.getElementById('task-form').addEventListener('submit', (e) => {
@@ -663,5 +1083,5 @@
     // Start app on load
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cb37f816684252a',t:'MTc3MDY0MTQ4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
