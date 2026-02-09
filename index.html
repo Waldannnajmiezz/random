@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Buddy Tasks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .task-card {
+      transition: all 0.2s ease;
+    }
+    .task-card:hover {
+      transform: translateY(-2px);
+    }
+    .priority-badge {
+      animation: pulse-soft 2s infinite;
+    }
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    .fade-in {
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .alert-box {
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app-wrapper" class="h-full w-full overflow-auto" style="background: #fef7ed;">
+   <div class="max-w-2xl mx-auto p-6"><!-- Header -->
+    <header class="text-center mb-8">
+     <h1 id="app-title" class="text-3xl font-bold mb-2" style="color: #1e293b;">📚 Study Buddy</h1>
+     <p class="text-sm" style="color: #64748b;">Smart task prioritization for busy students</p>
+    </header><!-- Add Task Form -->
+    <div class="rounded-2xl p-6 mb-6 shadow-sm" style="background: #ffffff;">
+     <h2 class="font-semibold mb-4 flex items-center gap-2" style="color: #1e293b;"><span>✨</span> Add New Task</h2>
+     <form id="task-form" class="space-y-4">
+      <div><label for="task-title" class="block text-sm font-medium mb-1" style="color: #1e293b;">What do you need to do?</label> <input type="text" id="task-title" placeholder="e.g., Finish math homework" required class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition" style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+       <div><label for="task-deadline" class="block text-sm font-medium mb-1" style="color: #1e293b;">📅 Deadline</label> <input type="datetime-local" id="task-deadline" required class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition" style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+       </div>
+       <div><label for="task-duration" class="block text-sm font-medium mb-1" style="color: #1e293b;">⏱️ Duration (mins)</label> <input type="number" id="task-duration" min="5" max="480" placeholder="30" required class="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition" style="border-color: #e2e8f0; background: #ffffff; color: #1e293b;">
+       </div>
+      </div>
+      <div><label class="block text-sm font-medium mb-2" style="color: #1e293b;">🎯 How important is this?</label>
+       <div class="flex gap-3"><label class="flex-1 cursor-pointer"> <input type="radio" name="importance" value="low" class="sr-only peer">
+         <div class="text-center py-3 px-4 rounded-xl border-2 peer-checked:border-green-500 peer-checked:bg-green-50 transition" style="border-color: #e2e8f0;"><span class="text-lg">😌</span>
+          <p class="text-xs mt-1 font-medium">Low</p>
+         </div></label> <label class="flex-1 cursor-pointer"> <input type="radio" name="importance" value="medium" class="sr-only peer" checked>
+         <div class="text-center py-3 px-4 rounded-xl border-2 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition" style="border-color: #e2e8f0;"><span class="text-lg">🤔</span>
+          <p class="text-xs mt-1 font-medium">Medium</p>
+         </div></label> <label class="flex-1 cursor-pointer"> <input type="radio" name="importance" value="high" class="sr-only peer">
+         <div class="text-center py-3 px-4 rounded-xl border-2 peer-checked:border-red-500 peer-checked:bg-red-50 transition" style="border-color: #e2e8f0;"><span class="text-lg">🔥</span>
+          <p class="text-xs mt-1 font-medium">High</p>
+         </div></label>
+       </div>
+      </div><button type="submit" id="submit-btn" class="w-full py-3 px-6 rounded-xl font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style="background: #f97316;"> Add Task </button>
+     </form>
+    </div><!-- Warnings and Suggestions -->
+    <div id="alerts-container" class="space-y-4 mb-6"></div><!-- Suggested Task -->
+    <div id="suggestion-card" class="hidden rounded-2xl p-5 mb-6 border-2 border-dashed fade-in" style="border-color: #f97316; background: #fff7ed;">
+     <div class="flex items-center gap-3"><span class="text-2xl">🎯</span>
+      <div class="flex-1">
+       <p class="text-xs font-medium uppercase tracking-wide" style="color: #f97316;">Start with this one!</p>
+       <p id="suggestion-title" class="font-semibold" style="color: #1e293b;"></p>
+       <p id="suggestion-time" class="text-xs mt-1" style="color: #92400e;"></p>
+      </div>
+     </div>
+    </div><!-- Task Lists -->
+    <div id="tasks-container" class="space-y-6"><!-- Do Now Section -->
+     <section id="do-now-section" class="hidden">
+      <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: #dc2626;"><span class="w-3 h-3 rounded-full bg-red-500 priority-badge"></span> Do Now 🚨</h3>
+      <div id="do-now-tasks" class="space-y-3"></div>
+     </section><!-- Do Next Section -->
+     <section id="do-next-section" class="hidden">
+      <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: #f59e0b;"><span class="w-3 h-3 rounded-full bg-yellow-500"></span> Do Next 📋</h3>
+      <div id="do-next-tasks" class="space-y-3"></div>
+     </section><!-- Can Wait Section -->
+     <section id="can-wait-section" class="hidden">
+      <h3 class="font-semibold mb-3 flex items-center gap-2" style="color: #22c55e;"><span class="w-3 h-3 rounded-full bg-green-500"></span> Can Wait 🌿</h3>
+      <div id="can-wait-tasks" class="space-y-3"></div>
+     </section>
+    </div><!-- Empty State -->
+    <div id="empty-state" class="text-center py-12">
+     <div class="text-6xl mb-4">
+      📝
+     </div>
+     <h3 id="empty-title" class="font-semibold text-lg mb-2" style="color: #1e293b;">No tasks yet!</h3>
+     <p class="text-sm" style="color: #64748b;">Add your first task above to get started</p>
+    </div><!-- Completed Section -->
+    <section id="completed-section" class="hidden mt-6"><button id="toggle-completed" class="w-full text-left font-medium py-2 flex items-center gap-2" style="color: #64748b;"> <span id="completed-arrow">▶</span> <span>Completed Tasks</span> <span id="completed-count" class="text-xs px-2 py-1 rounded-full" style="background: #e2e8f0;"></span> </button>
+     <div id="completed-tasks" class="space-y-3 mt-3 hidden"></div>
+    </section>
+   </div>
+  </div>
+  <script>
+    // Default configuration
+    const defaultConfig = {
+      app_title: 'Study Buddy',
+      empty_message: 'No tasks yet!',
+      background_color: '#fef7ed',
+      surface_color: '#ffffff',
+      text_color: '#1e293b',
+      primary_action: '#f97316',
+      secondary_text: '#64748b'
+    };
+
+    let config = { ...defaultConfig };
+    let tasks = [];
+    let showCompleted = false;
+
+    // Priority calculation with detailed scoring
+    function calculatePriority(task) {
+      const now = new Date();
+      const deadline = new Date(task.deadline);
+      const hoursUntilDue = (deadline - now) / (1000 * 60 * 60);
+      
+      const importanceScore = { high: 3, medium: 2, low: 1 }[task.importance];
+      const durationHours = task.duration / 60;
+      
+      // Urgency based on time until deadline vs duration needed
+      let urgencyScore;
+      if (hoursUntilDue <= 0) {
+        urgencyScore = 10; // Overdue
+      } else if (hoursUntilDue <= durationHours * 1.5) {
+        urgencyScore = 8; // Critical - barely enough time
+      } else if (hoursUntilDue <= 24) {
+        urgencyScore = 6; // Due within 24 hours
+      } else if (hoursUntilDue <= 72) {
+        urgencyScore = 4; // Due within 3 days
+      } else {
+        urgencyScore = 2; // More than 3 days away
+      }
+      
+      // Combined score (urgency weighted more heavily)
+      const totalScore = (urgencyScore * 2) + importanceScore;
+      
+      // Categorize
+      if (totalScore >= 15 || hoursUntilDue <= durationHours * 2) {
+        return { category: 'do-now', score: totalScore };
+      } else if (totalScore >= 10 || hoursUntilDue <= 48) {
+        return { category: 'do-next', score: totalScore };
+      } else {
+        return { category: 'can-wait', score: totalScore };
+      }
+    }
+
+    // Check for task conflicts and workload issues
+    function analyzeWorkload(activeTasks) {
+      const now = new Date();
+      const warnings = [];
+
+      // Group high-priority tasks by deadline window
+      const highPriorityTasks = activeTasks.filter(t => t.importance === 'high');
+      const next24Hours = highPriorityTasks.filter(t => {
+        const deadline = new Date(t.deadline);
+        const hoursUntilDue = (deadline - now) / (1000 * 60 * 60);
+        return hoursUntilDue > 0 && hoursUntilDue <= 24;
+      });
+
+      // Warn if multiple high-priority tasks clash
+      if (next24Hours.length > 2) {
+        const totalTime = next24Hours.reduce((sum, t) => sum + t.duration, 0);
+        warnings.push({
+          type: 'clash',
+          severity: 'high',
+          message: `⚠️ <strong>Task Overload!</strong> You have ${next24Hours.length} high-priority tasks due in 24 hours (${totalTime} mins total). Consider asking for an extension on one.`
+        });
+      } else if (next24Hours.length === 2) {
+        const totalTime = next24Hours.reduce((sum, t) => sum + t.duration, 0);
+        warnings.push({
+          type: 'clash',
+          severity: 'medium',
+          message: `🤯 <strong>Busy Day Ahead!</strong> Two high-priority tasks due tomorrow (${totalTime} mins). Plan your time carefully.`
+        });
+      }
+
+      // Check if workload is unrealistic
+      const doNowTasks = activeTasks.filter(t => calculatePriority(t).category === 'do-now');
+      if (doNowTasks.length > 0) {
+        const totalDoNow = doNowTasks.reduce((sum, t) => sum + t.duration, 0);
+        const earliestDeadline = Math.min(
+          ...doNowTasks.map(t => (new Date(t.deadline) - now) / (1000 * 60 * 60))
+        );
+
+        if (totalDoNow > earliestDeadline * 60) {
+          warnings.push({
+            type: 'unrealistic',
+            severity: 'high',
+            message: `😰 <strong>Unrealistic Workload!</strong> You need ${Math.ceil(totalDoNow)} minutes but only have ~${Math.round(earliestDeadline * 60)} minutes. Prioritize the most important tasks.`
+          });
+        } else if (totalDoNow > earliestDeadline * 30) {
+          warnings.push({
+            type: 'unrealistic',
+            severity: 'medium',
+            message: `⏰ <strong>Tight Timeline!</strong> Next task is due in ~${Math.round(earliestDeadline * 60)} mins but you need ${totalDoNow} mins total. Work efficiently!`
+          });
+        }
+      }
+
+      // Check for tasks with insufficient time
+      const tasksWithLowTime = activeTasks.filter(t => {
+        const deadline = new Date(t.deadline);
+        const hoursUntilDue = (deadline - now) / (1000 * 60 * 60);
+        const durationHours = t.duration / 60;
+        return hoursUntilDue > 0 && hoursUntilDue < durationHours && t.importance === 'high';
+      });
+
+      if (tasksWithLowTime.length > 0 && !warnings.some(w => w.type === 'unrealistic')) {
+        warnings.push({
+          type: 'insufficient-time',
+          severity: 'high',
+          message: `🚨 <strong>Impossible Timeline!</strong> "${tasksWithLowTime[0].title}" needs ${tasksWithLowTime[0].duration} mins but deadline is soon. Start now or ask for help!`
+        });
+      }
+
+      return warnings;
+    }
+
+    function renderAlerts(warnings) {
+      const container = document.getElementById('alerts-container');
+      container.innerHTML = '';
+
+      warnings.forEach(warning => {
+        const div = document.createElement('div');
+        div.className = 'alert-box rounded-xl p-4 shadow-sm';
+        
+        let bgColor, borderColor;
+        if (warning.severity === 'high') {
+          bgColor = '#fee2e2';
+          borderColor = '#fca5a5';
+        } else {
+          bgColor = '#fef3c7';
+          borderColor = '#fcd34d';
+        }
+        
+        div.style.background = bgColor;
+        div.style.borderLeft = `4px solid ${borderColor}`;
+        div.innerHTML = `<p style="color: #1e293b;">${warning.message}</p>`;
+        
+        container.appendChild(div);
+      });
+    }
+
+    function formatDeadline(dateStr) {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diff = date - now;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const days = Math.floor(hours / 24);
+      
+      if (diff < 0) return '⚠️ Overdue!';
+      if (hours < 1) return `${Math.floor(diff / (1000 * 60))} mins left`;
+      if (hours < 24) return `${hours} hours left`;
+      if (days === 1) return 'Tomorrow';
+      if (days < 7) return `${days} days left`;
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function createTaskElement(task) {
+      const priorityData = calculatePriority(task);
+      const deadlineText = formatDeadline(task.deadline);
+      const isOverdue = deadlineText.includes('Overdue');
+      
+      const div = document.createElement('div');
+      div.className = 'task-card rounded-xl p-4 shadow-sm fade-in';
+      div.style.background = config.surface_color || defaultConfig.surface_color;
+      div.dataset.taskId = task.id;
+      
+      const importanceEmoji = { high: '🔥', medium: '🤔', low: '😌' }[task.importance];
+      
+      div.innerHTML = `
+        <div class="flex items-start gap-3">
+          <button class="complete-btn mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center hover:bg-green-50 transition ${task.completed ? 'bg-green-500 border-green-500' : ''}" 
+            style="border-color: ${task.completed ? '#22c55e' : '#e2e8f0'};" data-id="${task.id}">
+            ${task.completed ? '<span class="text-white text-sm">✓</span>' : ''}
+          </button>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium ${task.completed ? 'line-through opacity-50' : ''}" style="color: ${config.text_color || defaultConfig.text_color};">${task.title}</p>
+            <div class="flex flex-wrap items-center gap-2 mt-2 text-xs" style="color: ${config.secondary_text || defaultConfig.secondary_text};">
+              <span class="${isOverdue ? 'text-red-500 font-semibold' : ''}">${deadlineText}</span>
+              <span>•</span>
+              <span>${task.duration} mins</span>
+              <span>•</span>
+              <span>${importanceEmoji}</span>
+            </div>
+          </div>
+          <button class="delete-btn p-2 rounded-lg hover:bg-red-50 transition text-red-400 hover:text-red-600" data-id="${task.id}">
+            🗑️
+          </button>
+        </div>
+      `;
+      
+      return div;
+    }
+
+    function renderTasks() {
+      const activeTasks = tasks.filter(t => !t.completed);
+      const completedTasks = tasks.filter(t => t.completed);
+      
+      // Generate warnings and suggestions
+      const warnings = analyzeWorkload(activeTasks);
+      renderAlerts(warnings);
+      
+      // Sort by priority score for suggestion
+      const prioritized = activeTasks.map(task => ({
+        task,
+        ...calculatePriority(task),
+        deadline: new Date(task.deadline)
+      })).sort((a, b) => {
+        const priorityOrder = { 'do-now': 0, 'do-next': 1, 'can-wait': 2 };
+        if (priorityOrder[a.category] !== priorityOrder[b.category]) {
+          return priorityOrder[a.category] - priorityOrder[b.category];
+        }
+        return b.score - a.score || a.deadline - b.deadline;
+      });
+      
+      // Categorize tasks
+      const doNow = prioritized.filter(p => p.category === 'do-now').map(p => p.task);
+      const doNext = prioritized.filter(p => p.category === 'do-next').map(p => p.task);
+      const canWait = prioritized.filter(p => p.category === 'can-wait').map(p => p.task);
+      
+      // Update sections
+      const doNowSection = document.getElementById('do-now-section');
+      const doNextSection = document.getElementById('do-next-section');
+      const canWaitSection = document.getElementById('can-wait-section');
+      const completedSection = document.getElementById('completed-section');
+      const emptyState = document.getElementById('empty-state');
+      const suggestionCard = document.getElementById('suggestion-card');
+      
+      // Render do now
+      const doNowContainer = document.getElementById('do-now-tasks');
+      doNowContainer.innerHTML = '';
+      doNow.forEach(task => doNowContainer.appendChild(createTaskElement(task)));
+      doNowSection.classList.toggle('hidden', doNow.length === 0);
+      
+      // Render do next
+      const doNextContainer = document.getElementById('do-next-tasks');
+      doNextContainer.innerHTML = '';
+      doNext.forEach(task => doNextContainer.appendChild(createTaskElement(task)));
+      doNextSection.classList.toggle('hidden', doNext.length === 0);
+      
+      // Render can wait
+      const canWaitContainer = document.getElementById('can-wait-tasks');
+      canWaitContainer.innerHTML = '';
+      canWait.forEach(task => canWaitContainer.appendChild(createTaskElement(task)));
+      canWaitSection.classList.toggle('hidden', canWait.length === 0);
+      
+      // Render completed
+      const completedContainer = document.getElementById('completed-tasks');
+      completedContainer.innerHTML = '';
+      completedTasks.forEach(task => completedContainer.appendChild(createTaskElement(task)));
+      completedSection.classList.toggle('hidden', completedTasks.length === 0);
+      document.getElementById('completed-count').textContent = completedTasks.length;
+      
+      // Show/hide empty state
+      emptyState.classList.toggle('hidden', activeTasks.length > 0);
+      
+      // Show suggestion
+      if (prioritized.length > 0) {
+        suggestionCard.classList.remove('hidden');
+        const topTask = prioritized[0];
+        document.getElementById('suggestion-title').textContent = topTask.task.title;
+        
+        const deadline = new Date(topTask.task.deadline);
+        const now = new Date();
+        const hoursLeft = Math.round((deadline - now) / (1000 * 60 * 60) * 10) / 10;
+        
+        let timeText = '';
+        if (hoursLeft < 1) {
+          timeText = `${Math.round((deadline - now) / (1000 * 60))} minutes left`;
+        } else if (hoursLeft < 24) {
+          timeText = `${Math.round(hoursLeft * 10) / 10} hours left`;
+        } else {
+          timeText = `${Math.round(hoursLeft / 24 * 10) / 10} days left`;
+        }
+        
+        document.getElementById('suggestion-time').textContent = `⏰ ${timeText} • ${topTask.task.duration} mins needed`;
+      } else {
+        suggestionCard.classList.add('hidden');
+      }
+      
+      // Attach event listeners
+      document.querySelectorAll('.complete-btn').forEach(btn => {
+        btn.addEventListener('click', () => toggleComplete(btn.dataset.id));
+      });
+      
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteTask(btn.dataset.id));
+      });
+    }
+
+    async function toggleComplete(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.completed = !task.completed;
+        const result = await window.dataSdk.update(task);
+        if (!result.isOk) {
+          task.completed = !task.completed;
+        }
+      }
+    }
+
+    async function deleteTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        const btn = document.querySelector(`.delete-btn[data-id="${id}"]`);
+        if (btn.dataset.confirming === 'true') {
+          btn.disabled = true;
+          const result = await window.dataSdk.delete(task);
+          if (!result.isOk) {
+            btn.disabled = false;
+            btn.dataset.confirming = 'false';
+            btn.textContent = '🗑️';
+          }
+        } else {
+          btn.dataset.confirming = 'true';
+          btn.textContent = '✓ Sure?';
+          btn.classList.add('text-red-600', 'font-semibold');
+          setTimeout(() => {
+            if (btn.dataset.confirming === 'true') {
+              btn.dataset.confirming = 'false';
+              btn.textContent = '🗑️';
+              btn.classList.remove('text-red-600', 'font-semibold');
+            }
+          }, 3000);
+        }
+      }
+    }
+
+    // Form submission
+    document.getElementById('task-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (tasks.filter(t => !t.completed).length >= 999) {
+        const btn = document.getElementById('submit-btn');
+        btn.textContent = 'Task limit reached!';
+        btn.disabled = true;
+        setTimeout(() => {
+          btn.textContent = 'Add Task';
+          btn.disabled = false;
+        }, 2000);
+        return;
+      }
+      
+      const title = document.getElementById('task-title').value.trim();
+      const deadline = document.getElementById('task-deadline').value;
+      const duration = parseInt(document.getElementById('task-duration').value);
+      const importance = document.querySelector('input[name="importance"]:checked').value;
+      
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.textContent = 'Adding...';
+      submitBtn.disabled = true;
+      
+      const newTask = {
+        id: Date.now().toString(),
+        title,
+        deadline,
+        duration,
+        importance,
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+      
+      const result = await window.dataSdk.create(newTask);
+      
+      submitBtn.textContent = 'Add Task';
+      submitBtn.disabled = false;
+      
+      if (result.isOk) {
+        e.target.reset();
+        document.querySelector('input[name="importance"][value="medium"]').checked = true;
+      } else {
+        submitBtn.textContent = 'Error - Try again';
+        setTimeout(() => { submitBtn.textContent = 'Add Task'; }, 2000);
+      }
+    });
+
+    // Toggle completed section
+    document.getElementById('toggle-completed').addEventListener('click', () => {
+      showCompleted = !showCompleted;
+      document.getElementById('completed-tasks').classList.toggle('hidden', !showCompleted);
+      document.getElementById('completed-arrow').textContent = showCompleted ? '▼' : '▶';
+    });
+
+    // Data handler
+    const dataHandler = {
+      onDataChanged(data) {
+        tasks = data;
+        renderTasks();
+      }
+    };
+
+    // Apply config to UI
+    function onConfigChange(cfg) {
+      config = { ...defaultConfig, ...cfg };
+      
+      document.getElementById('app-title').textContent = '📚 ' + (config.app_title || defaultConfig.app_title);
+      document.getElementById('empty-title').textContent = config.empty_message || defaultConfig.empty_message;
+      
+      document.getElementById('app-wrapper').style.background = config.background_color || defaultConfig.background_color;
+      
+      document.querySelectorAll('.task-card, #task-form').forEach(el => {
+        if (el.closest('.rounded-2xl')) {
+          el.style.background = config.surface_color || defaultConfig.surface_color;
+        }
+      });
+      
+      renderTasks();
+    }
+
+    // Element SDK setup
+    const elementConfig = {
+      defaultConfig,
+      onConfigChange,
+      mapToCapabilities: (cfg) => ({
+        recolorables: [
+          {
+            get: () => cfg.background_color || defaultConfig.background_color,
+            set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+          },
+          {
+            get: () => cfg.surface_color || defaultConfig.surface_color,
+            set: (v) => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
+          },
+          {
+            get: () => cfg.text_color || defaultConfig.text_color,
+            set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+          },
+          {
+            get: () => cfg.primary_action || defaultConfig.primary_action,
+            set: (v) => { cfg.primary_action = v; window.elementSdk.setConfig({ primary_action: v }); }
+          },
+          {
+            get: () => cfg.secondary_text || defaultConfig.secondary_text,
+            set: (v) => { cfg.secondary_text = v; window.elementSdk.setConfig({ secondary_text: v }); }
+          }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: (cfg) => new Map([
+        ['app_title', cfg.app_title || defaultConfig.app_title],
+        ['empty_message', cfg.empty_message || defaultConfig.empty_message]
+      ])
+    };
+
+    // Initialize
+    async function init() {
+      if (window.elementSdk) {
+        window.elementSdk.init(elementConfig);
+      }
+      
+      const result = await window.dataSdk.init(dataHandler);
+      if (!result.isOk) {
+        console.error('Failed to initialize data SDK');
+      }
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cb12b15c3a626f2',t:'MTc3MDYxNzA1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
